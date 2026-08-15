@@ -161,19 +161,19 @@ if user_input:
     st.session_state.history.append({"role": "user", "content": user_input})
     st.chat_message("user", avatar="user_avatar.jpg").write(user_input)
     # ==========【就插在这里，新增日期判断代码】==========
-   today_solar = get_today_solar()
-   today_lunar = get_today_lunar()
-   extra_prompt = ""
+    today_solar = get_today_solar()
+    today_lunar = get_today_lunar()
+    extra_prompt = ""
 
-   for item in special_dates:
-       if item["type"] == "solar":
-           if item["date"] == today_solar:
-               extra_prompt = f"今日是特殊日子，按照这条风格回复：{item['msg']}，保持马丁原本性格进行对话"
-               break
-       elif item["type"] == "lunar":
-           if today_lunar and item["date"] == today_lunar:
-               extra_prompt = f"今日是特殊日子，按照这条风格回复：{item['msg']}，保持马丁原本性格进行对话"
-               break
+    for item in special_dates:
+        if item["type"] == "solar":
+            if item["date"] == today_solar:
+                extra_prompt = f"今日是特殊日子，按照这条风格回复：{item['msg']}，保持马丁原本性格进行对话"
+                break
+        elif item["type"] == "lunar":
+            if today_lunar and item["date"] == today_lunar:
+                extra_prompt = f"今日是特殊日子，按照这条风格回复：{item['msg']}，保持马丁原本性格进行对话"
+                break
 
     final_system = system_prompt
     if extra_prompt:
