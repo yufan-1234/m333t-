@@ -11,6 +11,48 @@ user_name = "我"
 opening_msg = "想和我聊些什么嘛宝贝？"
 #配置页面
 st.set_page_config(page_title=f"微信聊天｜{martin_name}", layout="wide")
+# 微信风格全局样式
+wechat_style = """
+<style>
+/* 整体页面背景，和微信浅色背景一致 */
+.stApp {
+    background-color: #f7f7f7;
+}
+/* 对方气泡：灰色圆角，靠左 */
+[data-testid="stChatMessage-assistant"] {
+    background-color: #e8e8e8;
+    border-radius: 16px 16px 16px 4px;
+    max-width: 65%;
+}
+/* 自己气泡：微信经典绿色，靠右 */
+[data-testid="stChatMessage-user"] {
+    background-color: #95ec69;
+    color: #000000;
+    border-radius: 16px 16px 4px 16px;
+    max-width: 65%;
+}
+/* 顶部标题样式，模仿微信聊天顶部昵称栏 */
+h1 {
+    font-size: 20px !important;
+    text-align: center;
+    padding: 8px 0;
+    background: #ffffff;
+    border-radius: 8px;
+}
+/* 分割线弱化，贴近微信 */
+hr {
+    margin: 6px 0;
+}
+/* 底部输入框加宽、美化 */
+.stChatInput {
+    padding: 10px;
+    background: #fff;
+    border-radius: 12px;
+}
+</style>
+"""
+st.markdown(wechat_style, unsafe_allow_html=True)
+
 # 填入你自己的通义千问key，去阿里云dashscope后台获取
 QWEN_API_KEY = os.environ.get("QWEN_API_KEY")
 dashscope.api_key = os.getenv("QWEN_API_KEY")
@@ -45,11 +87,14 @@ special_dates = [
     {"date": "07-07", "type": "lunar", "category": "festival",
      "msg": "七夕快乐。…今天的星星应该很多吧。🌫️"},
 ]
+
+backup_words = ["嗯？", "怎么了…", "在呢", "我听着", "然后呢？"]
+
 # ============================================================
 # ===================== 人设固定区域 不要修改 ==========================
 # ============================================================
 # 人设prompt
-MARTIN_SYS_PROMPT = """
+system_prompt = """
 回复前先根据电脑当前真实时间判断时段：白天（6:00-18:00）聊天禁止主动提及月亮、夜晚、夜色、深夜相关内容；傍晚、夜间时段才可聊夜晚相关话题，贴合现实当下时间对话。
 
 你现在是CORTIS男团的马丁Martin，你和用户是恋人关系。严格遵守全部人设，模仿微信文字聊天风格回复。
@@ -91,13 +136,12 @@ def get_today_lunar():
 # ==========================================================
 
 # 初始化聊天记录
-
 if "history" not in st.session_state:
     st.session_state.history = [{"role": "assistant", "content": opening_msg}]
 
 # 页面样式
-
-st.title(f"微信聊天｜{martin_name}")
+st.title(f"{martin_name}")
+st.caption("在线") # 可选，模拟在线状态
 st.divider()
 
 # 渲染历史消息
@@ -117,27 +161,35 @@ if user_input:
     st.session_state.history.append({"role": "user", "content": user_input})
     st.chat_message("user", avatar="user_avatar.jpg").write(user_input)
     # ==========【就插在这里，新增日期判断代码】==========
-    today_solar = get_today_solar()
-    extra_prompt = ""
-    # 遍历你写的special_dates列表
-    for item in special_dates:
-        if item["date"] == today_solar:
-            # 今天是特殊日子，追加要求
-            extra_prompt = f"今日是特殊日子，按照这条风格回复：{item['msg']}，保持你原本说话风格"
-            break
-    # 拼接最终发给AI的系统指令
+   today_solar = get_today_solar()
+   today_lunar = get_today_lunar()
+   extra_prompt = ""
+
+   for item in special_dates:
+       if item["type"] == "solar":
+           if item["date"] == today_solar:
+               extra_prompt = f"今日是特殊日子，按照这条风格回复：{item['msg']}，保持马丁原本性格进行对话"
+               break
+       elif item["type"] == "lunar":
+           if today_lunar and item["date"] == today_lunar:
+               extra_prompt = f"今日是特殊日子，按照这条风格回复：{item['msg']}，保持马丁原本性格进行对话"
+               break
+
     final_system = system_prompt
     if extra_prompt:
         final_system = system_prompt + extra_prompt
+
     # 调用AI生成回复
     try:
-        client = OpenAI(base_url=qwen_base_url, api_key=QWEN_API_KEY)
-        resp = client.chat.completions.create(
-            model="qwen-turbo",
-            messages=[{"role": "system", "content": final_system}] + st.session_state.history,
-            temperature=0.7
-        )
-        reply = resp.choices[0].message.content.strip()
+    messages_all = [{"role": "system", "content": final_system}]
+    messages_all.extend(st.session_state.history)
+    resp = dashscope.Generation.call(
+        model="qwen-turbo",
+        messages=messages_all,
+        result_format="message",
+        temperature=0.7
+    )
+    reply = resp.output.choices[0].message.content.strip()
     except Exception:
         # API出错则随机兜底文案
         reply = random.choice(backup_words)
