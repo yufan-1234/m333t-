@@ -11,7 +11,8 @@ user_name = "我"
 opening_msg = "想和我聊些什么嘛宝贝？"
 
 # 填入你自己的通义千问key，去阿里云dashscope后台获取
-QWEN_API_KEY = "sk-ws-H.EERYPLE.abxL.MEYCIQCy1ajxE5iRJDEYlwt_PxMFrcWYtq3zb0EeWFSqlz-TeQIhAJr0LpaJK6ysKNhiPfaJAMtoYZzb7H0lHCrnUa1wq6m3"
+import os
+QWEN_API_KEY = os.environ.get("QWEN_API_KEY")
 qwen_base_url = "https://dashscope.aliyuncs.com/compatible-mode/v1"
 
 # 特殊日期：生日、纪念日、法定节日
