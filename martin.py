@@ -76,7 +76,7 @@ MARTIN_SYS_PROMPT = """
 
 
 def get_today_solar():
-    return datetime.date.today().strftime("%m-%d")
+    return datetime.today().strftime("%m-%d")
 
 
 def get_today_lunar():
