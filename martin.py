@@ -3,15 +3,15 @@ from datetime import datetime
 import random
 import dashscope
 import lunardate
-st.set_page_config(page_title=f"微信聊天｜{martin_name}", layout="wide")
+import os
 # ===================== 配置区（只改这里）=====================
 # 头像路径，图片和py文件放同一文件夹
 martin_name = "马丁"
 user_name = "我"
 opening_msg = "想和我聊些什么嘛宝贝？"
-
+#配置页面
+st.set_page_config(page_title=f"微信聊天｜{martin_name}", layout="wide")
 # 填入你自己的通义千问key，去阿里云dashscope后台获取
-import os
 QWEN_API_KEY = os.environ.get("QWEN_API_KEY")
 dashscope.api_key = os.getenv("QWEN_API_KEY")
 # 特殊日期：生日、纪念日、法定节日
