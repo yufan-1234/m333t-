@@ -1,7 +1,7 @@
 import streamlit as st
 from datetime import datetime
 import random
-from openai import OpenAI
+import dashscope
 import lunardate
 st.set_page_config(page_title=f"微信聊天｜{martin_name}", layout="wide")
 # ===================== 配置区（只改这里）=====================
@@ -13,8 +13,7 @@ opening_msg = "想和我聊些什么嘛宝贝？"
 # 填入你自己的通义千问key，去阿里云dashscope后台获取
 import os
 QWEN_API_KEY = os.environ.get("QWEN_API_KEY")
-qwen_base_url = "https://dashscope.aliyuncs.com/compatible-mode/v1"
-
+dashscope.api_key = os.getenv("QWEN_API_KEY")
 # 特殊日期：生日、纪念日、法定节日
 special_dates = [
     # 生日
