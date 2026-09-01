@@ -187,10 +187,9 @@ if user_input:
            model="qwen-turbo",
            messages=messages_all,
            result_format="message",
-           temperature=0.7
+           temperature=0.68
        )
-       reply =
-       resp.output.choices[0].message.content.strip()
+       reply = resp.output.choices[0].message.content.strip()
     except Exception:
         # API出错则随机兜底文案
         reply = random.choice(backup_words)
