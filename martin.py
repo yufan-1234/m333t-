@@ -181,15 +181,16 @@ if user_input:
 
     # 调用AI生成回复
     try:
-    messages_all = [{"role": "system", "content": final_system}]
-    messages_all.extend(st.session_state.history)
-    resp = dashscope.Generation.call(
-        model="qwen-turbo",
-        messages=messages_all,
-        result_format="message",
-        temperature=0.7
-    )
-    reply = resp.output.choices[0].message.content.strip()
+       messages_all = [{"role": "system", "content": final_system}]
+       messages_all.extend(st.session_state.history)
+       resp = dashscope.Generation.call(
+           model="qwen-turbo",
+           messages=messages_all,
+           result_format="message",
+           temperature=0.7
+       )
+       reply =
+       resp.output.choices[0].message.content.strip()
     except Exception:
         # API出错则随机兜底文案
         reply = random.choice(backup_words)
